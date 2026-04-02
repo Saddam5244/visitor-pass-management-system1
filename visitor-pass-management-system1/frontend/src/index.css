@@ -1,0 +1,370 @@
+  *,
+ ::before,
+ ::after{
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+ }
+ label{
+  font-size: 20px;
+  margin-right: 300px;
+ }
+  
+ html,
+ body{
+  height: 100%;
+  width: 100%;
+ }
+
+ body{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ }
+
+ .container{
+  background-color: #FFF;
+  padding: 32px 48px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  height: 640px;
+  box-shadow: 8px 8px 24px 0px rgba(66, 68, 90, 1);
+  margin-bottom: 60px;
+ }
+
+ .container1{
+  background-color: #FFF;
+  padding: 32px 48px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  height: 350px;
+  box-shadow: 8px 8px 24px 0px rgba(66, 68, 90, 1);
+ }
+ .container3{
+  background-color: #FFF;
+  padding: 32px 48px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  height: 250px;
+  box-shadow: 8px 8px 24px 0px rgba(66, 68, 90, 1);
+ }
+ .container4{
+  background-color: #FFF;
+  padding: 32px 48px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  height: 450px;
+  box-shadow: 8px 8px 24px 0px rgba(66, 68, 90, 1);
+  margin-bottom: 50px;
+ }
+ .container5{
+  background-color: #FFF;
+  padding: 32px 48px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  height: 450px;
+  box-shadow: 8px 8px 24px 0px rgba(66, 68, 90, 1);
+  margin-bottom: 50px;
+ }
+ .container3 > div{
+  display: flex;
+  flex-direction: column;
+ }
+
+ .container3 input {
+  width: 100%;
+  font-size: 20px;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid black;  
+}
+
+.container3 input::placeholder {
+  font-size: 12px;
+  font-style: italic;
+}
+select{
+   font-size: large;
+   border-radius: 10px;
+}
+ .container label {
+  margin: 10px 0 5px;
+  font-size: 14px;
+}
+.container4 label {
+  margin: 10px 0 5px;
+  font-size: 14px;
+}
+.container5 label {
+  margin: 10px 0 5px;
+  font-size: 14px;
+}
+ .container > h1 {
+  margin-bottom: 20px;
+ }
+  .container4 > h1 {
+  margin-bottom: 20px;
+ }
+  .container5 > h1 {
+  margin-bottom: 20px;
+ }
+.container1 > h1 {
+  margin-bottom: 20px;
+ }
+ 
+ .container > form{
+             display: flex;
+             flex-direction: column;
+             gap: 10px;
+ }
+
+ .container4 > form{
+             display: flex;
+             flex-direction: column;
+             gap: 10px;
+ }
+
+  .container5 > form{
+             display: flex;
+             flex-direction: column;
+             gap: 10px;
+ }
+
+ .container1 > form{
+             display: flex;
+             flex-direction: column;
+             gap: 10px;
+ }
+
+ 
+ .container > div{
+  display: flex;
+  flex-direction: column;
+ }
+
+.container4 > div{
+  display: flex;
+  flex-direction: column;
+ }
+ .container5 > div{
+  display: flex;
+  flex-direction: column;
+ }
+ .container1 div{
+  display: flex;
+  flex-direction: column;
+ }
+
+ .container input{
+  width: 100%;
+  font-size: 20px;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid black;  
+ }
+
+  .container4 input{
+  width: 100%;
+  font-size: 20px;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid black;  
+ }
+
+  .container5 input{
+  width: 100%;
+  font-size: 20px;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid black;  
+ }
+
+ .container1 input{
+  width: 100%;
+  font-size: 20px;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid black;  
+ }
+
+
+ .container input::placeholder{
+   font-size: 12px;
+   font-style: italic;
+ }
+
+ .container4 input::placeholder{
+   font-size: 12px;
+   font-style: italic;
+ }
+ .container5 input::placeholder{
+   font-size: 12px;
+   font-style: italic;
+ }
+
+ .container1 input::placeholder{
+   font-size: 12px;
+   font-style: italic;
+ }
+
+ button{
+  background-color: purple;
+  border: none;
+  font-size: 20px;
+  color: white;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  margin: 10px 0;
+  width: 100%;
+ } 
+ 
+ .container span{
+  padding: 10px;
+  float: right;
+  margin-right: 40px;
+ }
+ .container .Saddam{
+  padding: 10px;
+  float: right;
+  margin-right: 40px;
+ }
+  .container4 span{
+  padding: 10px;
+  float: right;
+  margin-right: 40px;
+ }
+ .container4 .Saddam{
+  padding: 10px;
+  float: right;
+  margin-right: 40px;
+ }
+  .container5 span{
+  padding: 10px;
+  float: right;
+  margin-right: 40px;
+ }
+ .container5 .Saddam{
+  padding: 10px;
+  float: right;
+  margin-right: 40px;
+ }
+
+
+@media (max-width: 768px) {
+  .container, .container1, .container3, .container4, .container5 {
+    max-width: 90%;
+    padding: 24px 32px;
+    margin: 20px;
+  }
+  
+  .container {
+    height: auto;
+    min-height: 640px;
+  }
+  
+  .container1 {
+    height: auto;
+    min-height: 350px;
+  }
+  
+  .container3 {
+    height: auto;
+    min-height: 250px;
+  }
+  
+  .container4, .container5 {
+    height: auto;
+    min-height: 450px;
+  }
+  
+  label {
+    font-size: 18px;
+    margin-right: 0;
+  }
+  
+  .container input, .container1 input, .container3 input, .container4 input, .container5 input {
+    font-size: 18px;
+  }
+  
+  button {
+    font-size: 18px;
+    padding: 12px;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .container, .container1, .container3, .container4, .container5 {
+    max-width: 95%;
+    padding: 20px 24px;
+    margin: 10px;
+  }
+  
+  .container {
+    height: auto;
+    min-height: 600px;
+  }
+  
+  .container1 {
+    height: auto;
+    min-height: 320px;
+  }
+  
+  .container3 {
+    height: auto;
+    min-height: 220px;
+  }
+  
+  .container4, .container5 {
+    height: auto;
+    min-height: 400px;
+  }
+  
+  label {
+    font-size: 16px;
+  }
+  
+  .container input, .container1 input, .container3 input, .container4 input, .container5 input {
+    font-size: 16px;
+    padding: 8px;
+  }
+  
+  button {
+    font-size: 16px;
+    padding: 10px;
+  }
+  
+  .container > h1, .container1 > h1, .container4 > h1, .container5 > h1 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 320px) {
+  .container, .container1, .container3, .container4, .container5 {
+    padding: 16px 20px;
+  }
+  
+  label {
+    font-size: 14px;
+  }
+  
+  .container input, .container1 input, .container3 input, .container4 input, .container5 input {
+    font-size: 14px;
+  }
+  
+  button {
+    font-size: 14px;
+    padding: 8px;
+  }
+}

@@ -1,0 +1,43 @@
+//  Importing express package
+require("dotenv").config();
+const express = require('express');
+const mongoose = require('mongoose');
+require('./config/db');
+const visitorRoutes = require('./routes/visitors');
+const userRoutes = require('./routes/users');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const passRoutes = require('./routes/passRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+const checkLogRoutes = require('./routes/checkLogRoutes');
+const emailRoutes = require('./routes/emailRoutes');
+const smsRoutes = require("./routes/smsRoutes");
+const cors = require('cors');
+const bodyParser = require("body-parser");
+
+
+//  Express APP
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(cors());
+app.use('/api/visitors', visitorRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/passes', passRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/checklogs', checkLogRoutes);
+app.use('/api', emailRoutes);
+app.use("/api", smsRoutes);
+
+
+
+// PORT num
+const PORT = process.env.PORT || 4000;
+
+        // Listen for requets
+        app.listen(PORT, () => {
+            console.log(`Server is running on port: http://localhost:${PORT}`)
+        });
+  
+
