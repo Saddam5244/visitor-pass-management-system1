@@ -30,7 +30,17 @@ app.use('/api/checklogs', checkLogRoutes);
 app.use('/api', emailRoutes);
 app.use("/api", smsRoutes);
 
+app.get("/", (req, res) => {
+  res.send("Visitor Pass Management API Running 🚀");
+});
 
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
+});
 
 // PORT num
 const PORT = process.env.PORT || 4000;
