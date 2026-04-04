@@ -1,6 +1,8 @@
-import axios from 'axios';
+
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import { getUsers } from "../services/api";
+
 
 function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -8,7 +10,7 @@ function AdminDashboard() {
 
     const fetchUsers = async () =>{
        try{
-        const response = await axios.get("http://localhost:4000/api/user")
+        const response = await getUsers();
           setUsers(response.data);
        }catch(error){
           console.error("Error fetching users:", error);

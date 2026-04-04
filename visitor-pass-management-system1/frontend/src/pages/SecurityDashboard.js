@@ -1,21 +1,13 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-
+import { getLogs, checkoutVisitor } from "../services/api";
 function SecurityDashboard() {
     const [logs, setLogs] = useState([]);
     const navigate = useNavigate();
 
     const fetchLogs = async () =>{
        try{
-        const res = await axios.get("http://localhost:4000/api/checklogs",
-            {
-                headers:{
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
-            }
-        )
-        
+       const res = await getLogs();    
         setLogs(res.data);
        }catch(error){
           console.error("Error fetching visitors:", error);
@@ -29,14 +21,7 @@ function SecurityDashboard() {
   //  Check-out visitor 
   const handleCheckOut = async(id) =>{
     try{
-        await axios.put(`http://localhost:4000/api/checklogs/${id}`,
-            {},
-            {
-                headers:{
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
-            }
-        );
+        await checkoutVisitor(id);
        navigate("/reports")
      fetchLogs();
     }catch(error) {

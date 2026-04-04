@@ -1,7 +1,6 @@
 import React, { useEffect, useState, } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import { getLogs } from "../services/api";
 function Reports() {
 
   const [logs, setLogs] = useState([]);
@@ -10,7 +9,7 @@ function Reports() {
   // Fetch Logs from backend
   const fetchLogs = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/checklogs");
+      const res = await getLogs();
       setLogs(res.data);
     } catch (error) {
       console.log("Error fetching logs", error);

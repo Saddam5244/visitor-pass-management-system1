@@ -1,6 +1,7 @@
-import axios from 'axios';
+// import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import { getVisitors } from "../services/api";
 
 function EmployeeDashboard() {
     const [visitors, setVisitors] = useState([]);
@@ -8,15 +9,8 @@ function EmployeeDashboard() {
 
     const fetchVisitors = async () =>{
        try{
-        const response = await axios.get("http://localhost:4000/api/visitors",
-            {
-                headers:{
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
-            }
-        );
-          console.log("API RESPONSE : ", response.data);
-          setVisitors(response.data);
+        const res = await getVisitors()
+          setVisitors(res.data);
        }catch(error){
           console.error("Error fetching visitors:", error.response?.data || error.message);
        }       

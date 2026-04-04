@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify';
 import { handleError, handleSuccess } from '../utils';
+import { loginUser } from "../services/api";
+
 
 function Login() {
 
@@ -21,34 +23,24 @@ function Login() {
         e.preventDefault();
 
         const { email, password } = loginInfo;
-
+           
         if (!email || !password) {
             return handleError('Email and password are required');
         }
 
         try {
-            const url = "http://localhost:4000/api/user/login"; 
-
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(loginInfo)
-            });
-
-            const result = await response.json();
+            
+            const res = await loginUser(loginInfo);
 
             // Backend response
-            const { message, token, role } = result;
+            const { message, token, role } = res.data;
 
-            if (response.ok) {
+            if (res.ok) {
                 handleSuccess(message);
 
                 //  Store token
                 localStorage.setItem("token", token);
                 localStorage.setItem("role", role);
-
                 localStorage.setItem("user", JSON.stringify({ role }));
 
                 //  Role based redirect

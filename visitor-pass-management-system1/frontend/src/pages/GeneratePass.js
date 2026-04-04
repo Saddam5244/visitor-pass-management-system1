@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import QRCode from "react-qr-code";
 import { useNavigate } from "react-router-dom";
+import { getLatestVisitor } from "../services/api";
 
 function GeneratePass() {
    const navigate = useNavigate();
@@ -12,19 +12,9 @@ function GeneratePass() {
     try {
       const token = localStorage.getItem("token");
       console.log("TOKEN:", token);
-      const response = await axios.get(
-        "http://localhost:4000/api/visitors/latest",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      console.log("DATA:", response.data);
-      setVisitor(response.data);
-
-      
-
+       const res = await getLatestVisitor();
+      console.log("DATA:", res.data);
+      setVisitor(res.data);
     } catch (error) {
       console.log("Error: ", error.response?.data || error.message);
     }

@@ -1,6 +1,6 @@
 import { Scanner } from "@yudiel/react-qr-scanner";
-import axios from "axios";
 import { useState, useEffect } from "react";
+import { verifyVisitor, createLog } from "../services/api";
 
 function QRScanner() {
   const [scanResult, setScanResult] = useState("");
@@ -33,28 +33,14 @@ function QRScanner() {
       }
     try {
       const parsedData = JSON.parse(data);
-        await axios.post(
-                "http://localhost:4000/api/visitors/verify",
-                  {visitorId: parsedData._id}
-                ,{
-                  headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                  },
-                }
-              );
-      await axios.post(
-        "http://localhost:4000/api/checklogs",
-        
-        {
-          visitor: parsedData._id,
-          status: "checked-in",
-          checkInTime: new Date(),
-        },{
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+        //  Visitor verify
+    await verifyVisitor(parsedData._id);
+      //  Log create
+    await createLog({
+      visitor: parsedData._id,
+      status: "checked-in",
+      checkInTime: new Date(),
+    });
 
       alert("Entry Allowed & Logged");
 

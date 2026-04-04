@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import axios from "axios";
 import { useLocation, useNavigate} from "react-router-dom";
 import {ToastContainer, toast} from "react-toastify";
-
+import { verifyOtp } from "../services/api";
 
  function OTPVerify() {
     const [otp, setOtp] = useState("");
@@ -17,10 +16,8 @@ import {ToastContainer, toast} from "react-toastify";
         return;
     }
     try{
-        const response = await axios.post("http://localhost:4000/api/user/otpverify",
-            {email, otp}
-        );
-        const {success, message} = response.data;
+        const response = await verifyOtp({ email, otp });
+               const {success, message} = response.data;
         if(success){
             toast.success(message);
             setTimeout(() =>{

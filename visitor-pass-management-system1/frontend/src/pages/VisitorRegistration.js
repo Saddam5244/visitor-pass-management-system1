@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { createVisitor } from "../services/api";
 
 function VisitorRegistration() {
 const navigate = useNavigate();
@@ -33,17 +33,7 @@ const navigate = useNavigate();
     }
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:4000/api/visitors",
-        visitor,
-        {
-          headers:{
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
+      await createVisitor(visitor);
       toast.success("Visitor registered successfully");
 
         setTimeout(() => {
