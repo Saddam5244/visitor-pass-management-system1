@@ -5,13 +5,13 @@ const nodemailer = require("nodemailer");
 
 // transporter define 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
-    user: "saddamahmad5244@gmail.com",
-    pass: "oxdd bmbk htzv dwoe"
-  },tls: {
-  rejectUnauthorized: false
-}
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 // OTP store init 
@@ -19,6 +19,9 @@ global.otpStore = global.otpStore || {};
 
 const registerUser = async (req, res) => {
     try {
+      console.log("EMAIL_USER:", process.env.EMAIL_USER);
+        console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Present" : "Missing");
+
         const { name, email, password, phone, department, role } = req.body;
 
         const existingUser = await User.findOne({ email });
@@ -44,6 +47,7 @@ const registerUser = async (req, res) => {
 
         // Send Email
         await transporter.sendMail({
+          from: process.env.EMAIL_USER, 
             to: email,
             subject: "OTP Verification",
             text: `Your OTP is ${otp}`
@@ -55,10 +59,10 @@ const registerUser = async (req, res) => {
         });
 
     } catch (err) {
-        console.log("Register Error:", err);
+        console.log("Register Error Full:", err);
         res.status(500).json({
             success: false,
-            message: "Failed to send OTP"
+            message: err.message
         });
     }
 };
