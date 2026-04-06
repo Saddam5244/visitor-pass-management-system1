@@ -16,7 +16,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
       <Routes>
-        <Route path='/' element={<Navigate to ="/Register" />}/>
+        <Route path='/' element={<Navigate to ="/register" />}/>
         <Route path='/register' element={<Register/>}/>
         <Route path='/otpverify' element={<OTPVerify/>}/>
         <Route path='/login' element={<Login/>}/>
