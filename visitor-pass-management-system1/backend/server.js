@@ -17,10 +17,15 @@ const bodyParser = require("body-parser");
 
 //  Express APP
 const app = express();
+app.use(cors({
+  origin: "https://visitor-pass-management-system1-6.onrender.com",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+app.options("*", cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors());
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/appointments', appointmentRoutes);
