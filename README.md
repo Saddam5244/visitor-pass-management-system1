@@ -1,5 +1,8 @@
 # PassPulse — Digital Visitor Pass Management System (MERN Stack)
 
+[![CI/CD Status](https://github.com/Saddam5244/visitor-pass-management-system1/actions/workflows/ci.yml/badge.svg)](https://github.com/Saddam5244/visitor-pass-management-system1/actions)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Saddam5244/visitor-pass-management-system1)
+
 PassPulse is an enterprise-grade **Visitor Pass Management System** built with the **MERN Stack** (MongoDB, Express, React, Node.js). Designed to replace archaic paper entry logs, PassPulse digitizes the complete visitor lifecycle: public pre-registration, OTP verification, host approval workflows, cryptographic QR badge generation, live webcam check-in/out scanning, overstay alerts, audit trails, and multi-campus support.
 
 ---
