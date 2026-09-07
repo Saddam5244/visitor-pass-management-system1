@@ -20,6 +20,8 @@ Because the Express backend is configured to automatically build and serve the R
    ```text
    mongodb+srv://admin:<password>@cluster0.abcde.mongodb.net/visitor_pass_db?retryWrites=true&w=majority
    ```
+   > **Note on Special Characters**: If your MongoDB password contains special characters like `@`, `#`, or `%`, URL-encode them (e.g. `@` becomes `%40`, so `pass@123` becomes `pass%40123`), or use an alphanumeric password like `saddam12345` to avoid URI parsing conflicts.
+
 
 ### Step 2: Deploy to Render.com
 1. Push this repository to **GitHub**.
