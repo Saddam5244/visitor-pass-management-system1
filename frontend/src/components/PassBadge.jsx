@@ -61,7 +61,7 @@ const PassBadge = ({ pass, visitor, host, organization, onStatusChange }) => {
                 src={
                   currentVisitor.photoUrl.startsWith('http') || currentVisitor.photoUrl.startsWith('data:')
                     ? currentVisitor.photoUrl
-                    : `http://localhost:5000${currentVisitor.photoUrl}`
+                    : (import.meta.env.PROD ? currentVisitor.photoUrl : `http://localhost:5000${currentVisitor.photoUrl}`)
                 }
                 alt={currentVisitor.fullName}
               />
