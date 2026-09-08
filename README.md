@@ -8,31 +8,31 @@ PassPulse is an enterprise-grade **Visitor Pass Management System** built with t
 
 ## Architecture & System Workflow
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor V as Visitor
-    actor H as Host Employee
-    actor S as Security Officer
-    participant API as Express API Server
-    participant DB as MongoDB
-    participant N as Notification Engine
+### System Workflow
 
-    V->>API: 1. Request OTP (Email / Phone)
-    API->>N: 2. Dispatch 6-digit OTP Code
-    V->>API: 3. Verify OTP & Submit Pre-Registration (Photo, Purpose, Host)
-    API->>DB: 4. Save Visitor & Appointment (Status: PENDING)
-    API->>N: 5. Alert Host Employee via Email
-    H->>API: 6. Host Approves Appointment
-    API->>DB: 7. Generate Pass with QR Code (Status: ISSUED)
-    API->>N: 8. Send Digital Pass Link to Visitor
-    V->>S: 9. Visitor arrives & presents QR Badge
-    S->>API: 10. Scan QR via Webcam or Barcode Entry
-    API->>DB: 11. Create CheckLog (Status: IN) & Update Pass (CHECKED_IN)
-    API->>N: 12. Alert Host of Visitor Arrival
-    S->>API: 13. Visitor Departs -> Security Check-Out
-    API->>DB: 14. Record Exit Timestamp & Total Duration (Status: OUT)
-```
+1. **Visitor Registration**
+   The visitor enters their basic details and verifies their mobile number or email using an OTP.
+
+2. **Visit Request**
+   The visitor provides the purpose of the visit and selects the host employee.
+
+3. **Host Approval**
+   The host employee receives the request and approves the visitor's appointment.
+
+4. **Digital Pass Generation**
+   After approval, the system generates a digital visitor pass with a unique QR code.
+
+5. **Visitor Check-In**
+   When the visitor arrives, the security officer scans the QR code and checks the visitor in.
+
+6. **Host Notification**
+   The host employee receives a notification that the visitor has arrived.
+
+7. **Visitor Check-Out**
+   When the visitor leaves, security checks them out and the system records the exit time and visit duration.
+
+8. **Visit Completed**
+   The visitor's complete entry and exit information is stored securely in the database.
 
 ---
 
