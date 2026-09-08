@@ -67,6 +67,11 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`[Visitor Pass Server] Running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+// Only bind to port if run directly as a standalone server
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`[Visitor Pass Server] Running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  });
+}
+
+module.exports = app;
