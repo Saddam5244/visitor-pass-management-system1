@@ -360,6 +360,59 @@ export const getLocalFallback = (endpoint, options = {}) => {
     };
   }
 
+  // 9. HOSTS LIST (includes registered Saddam Ahmad)
+  if (endpoint.includes('/auth/hosts')) {
+    return {
+      success: true,
+      hosts: [
+        {
+          _id: 'yOfrKlzAbnRI2rVGQKZaUFGiOTq1',
+          name: 'Saddam Ahmad',
+          email: 'ahmadsaddam443@gmail.com',
+          department: 'Engineering',
+          role: 'admin',
+        },
+        {
+          _id: 'host-1',
+          name: 'Host Employee',
+          email: 'host@visitorpass.com',
+          department: 'Engineering',
+          role: 'employee',
+        },
+        {
+          _id: 'host-2',
+          name: 'HR Team',
+          email: 'hr@visitorpass.com',
+          department: 'Human Resources',
+          role: 'employee',
+        },
+      ],
+    };
+  }
+
+  // 10. VISITOR OTP REQUEST
+  if (endpoint.includes('/visitors/otp/request')) {
+    let body = {};
+    try {
+      body = typeof options.body === 'string' ? JSON.parse(options.body) : (options.body || {});
+    } catch {}
+    const code = '999999';
+    return {
+      success: true,
+      message: `Verification code sent to ${body.identifier || 'phone/email'}`,
+      demoOtp: code,
+    };
+  }
+
+  // 11. VISITOR OTP VERIFY
+  if (endpoint.includes('/visitors/otp/verify')) {
+    return {
+      success: true,
+      message: 'Identity verified successfully',
+      verified: true,
+    };
+  }
+
   // Default success response
   return { success: true, message: 'Operation processed' };
 };
