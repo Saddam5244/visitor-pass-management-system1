@@ -31,20 +31,34 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
           qrInstance = new Html5Qrcode('qr-reader-viewport');
           html5QrCodeRef.current = qrInstance;
 
-          await qrInstance.start(
-            { facingMode: 'environment' },
-            {
-              fps: 10,
-              qrbox: { width: 250, height: 250 },
-            },
-            (decodedText) => {
-              handleVerify(decodedText);
-              if (html5QrCodeRef.current?.isScanning) {
-                html5QrCodeRef.current.stop().catch(() => {});
+          const scannerConfig = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+          };
+
+          const onScanSuccess = (decodedText) => {
+            handleVerify(decodedText);
+            if (html5QrCodeRef.current?.isScanning) {
+              html5QrCodeRef.current.stop().catch(() => {});
+            }
+          };
+
+          // Try environment camera (mobile), then user webcam (laptops/desktops)
+          try {
+            await qrInstance.start({ facingMode: 'environment' }, scannerConfig, onScanSuccess, () => {});
+          } catch (envErr) {
+            console.warn('Environment camera unavailable, falling back to front/user webcam:', envErr);
+            try {
+              await qrInstance.start({ facingMode: 'user' }, scannerConfig, onScanSuccess, () => {});
+            } catch (userErr) {
+              const devices = await Html5Qrcode.getCameras().catch(() => []);
+              if (devices && devices.length > 0) {
+                await qrInstance.start(devices[0].id, scannerConfig, onScanSuccess, () => {});
+              } else {
+                throw userErr;
               }
-            },
-            () => {}
-          );
+            }
+          }
         } catch (err) {
           console.warn('Camera start issue:', err);
           setCameraError('Webcam not detected or permission denied. Please switch to Manual Pass Entry.');
@@ -62,11 +76,23 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
   }, [isOpen, activeTab, scannedPass]);
 
   const handleVerify = async (codeToVerify) => {
-    const target = codeToVerify || passNumberInput;
+    let target = (codeToVerify || passNumberInput || '').trim();
     if (!target) {
       showToast('Please enter or scan a pass number', 'warning');
       return;
     }
+
+    // If QR code contains a URL, extract pass number from path
+    if (target.includes('/pass/')) {
+      const parts = target.split('/pass/')[1].split('?')[0].split('/');
+      target = parts[0];
+    }
+
+    // If target is a JSON string payload from the QR code
+    try {
+      const parsed = JSON.parse(target);
+      if (parsed.passNumber) target = parsed.passNumber;
+    } catch {}
 
     setLoading(true);
     try {

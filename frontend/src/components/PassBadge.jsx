@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 import { Download, Printer, ShieldCheck, Clock, UserCheck, Building } from 'lucide-react';
 import api from '../services/api';
 import StatusPill from './StatusPill';
@@ -9,6 +10,37 @@ const PassBadge = ({ pass, visitor, host, organization, onStatusChange }) => {
   const currentVisitor = visitor || pass.visitorId;
   const currentHost = host || pass.hostId;
   const currentOrg = organization || pass.organizationId;
+
+  const [qrImage, setQrImage] = useState(pass.qrCodeData || null);
+
+  useEffect(() => {
+    if (pass.qrCodeData && pass.qrCodeData.startsWith('data:image')) {
+      setQrImage(pass.qrCodeData);
+      return;
+    }
+
+    // Generate crisp QR code on the fly from pass details
+    const qrPayload = JSON.stringify({
+      passNumber: pass.passNumber,
+      visitor: currentVisitor?.fullName || '',
+      validTo: pass.validTo || '',
+      issuedAt: pass.validFrom || new Date().toISOString(),
+    });
+
+    QRCode.toDataURL(qrPayload, {
+      margin: 1,
+      width: 240,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#0f172a', light: '#ffffff' },
+    })
+      .then((url) => setQrImage(url))
+      .catch(() => {
+        // Fallback to passNumber string
+        QRCode.toDataURL(pass.passNumber || 'PASS-DEMO', { margin: 1, width: 240 })
+          .then((url) => setQrImage(url))
+          .catch(() => {});
+      });
+  }, [pass.passNumber, pass.qrCodeData, currentVisitor?.fullName, pass.validTo, pass.validFrom]);
 
   const handleDownloadPDF = async () => {
     try {
@@ -110,14 +142,18 @@ const PassBadge = ({ pass, visitor, host, organization, onStatusChange }) => {
 
           {/* Scannable QR Code */}
           <div className="badge-qr-box">
-            {pass.qrCodeData ? (
-              <img src={pass.qrCodeData} alt={`QR Code for ${pass.passNumber}`} />
+            {qrImage ? (
+              <img
+                src={qrImage}
+                alt={`QR Code for ${pass.passNumber}`}
+                style={{ width: '135px', height: '135px', display: 'block', margin: '0 auto', borderRadius: '4px' }}
+              />
             ) : (
-              <div style={{ width: 140, height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                Generating QR...
+              <div style={{ width: 135, height: 135, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '11px' }}>
+                Rendering QR Code...
               </div>
             )}
-            <div style={{ fontSize: '10px', color: '#64748b', marginTop: '4px', fontWeight: 600 }}>
+            <div style={{ fontSize: '10px', color: '#64748b', marginTop: '6px', fontWeight: 600, letterSpacing: '0.04em' }}>
               SCAN TO VERIFY / CHECK-IN
             </div>
           </div>
