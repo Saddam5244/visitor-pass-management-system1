@@ -1,3 +1,5 @@
+import { getLocalFallback } from './localDataFallback';
+
 const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 
 /**
@@ -34,6 +36,12 @@ const request = async (endpoint, options = {}) => {
       return await res.blob();
     }
 
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('text/html')) {
+      // Backend not mounted on this route (e.g. Firebase Hosting static serving index.html)
+      return getLocalFallback(endpoint, options);
+    }
+
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
@@ -42,8 +50,8 @@ const request = async (endpoint, options = {}) => {
 
     return data;
   } catch (error) {
-    console.error(`[API Error] ${endpoint}:`, error.message);
-    throw error;
+    console.warn(`[PassPulse API] ${endpoint}: ${error.message}. Serving local data fallback.`);
+    return getLocalFallback(endpoint, options);
   }
 };
 
