@@ -1,9 +1,22 @@
 # Deployment Guide — PassPulse Visitor Pass Management System
 
+## 🌐 Live Deployed Environments
+
+| Service | Environment | URL |
+| :--- | :--- | :--- |
+| **Production Web App** | Firebase Hosting (Global CDN) | [https://visitor-pass-5244.web.app](https://visitor-pass-5244.web.app) |
+| **Firebase Mirror** | Firebase App Domain | [https://visitor-pass-5244.firebaseapp.com](https://visitor-pass-5244.firebaseapp.com) |
+| **Self-Service Kiosk** | Visitor Pre-Registration | [https://visitor-pass-5244.web.app/public-register](https://visitor-pass-5244.web.app/public-register) |
+| **Staff Registration** | Employee / Host Onboarding | [https://visitor-pass-5244.web.app/register](https://visitor-pass-5244.web.app/register) |
+| **Security Gate Desk** | Live Webcam QR Scanner | [https://visitor-pass-5244.web.app/security](https://visitor-pass-5244.web.app/security) |
+
+---
+
 This guide explains how to deploy **PassPulse** to production across different environments:
-1. **Cloud Single-Service Deployment** (Render / Railway / AWS EC2 / DigitalOcean) — *Recommended & Easiest*
-2. **Containerized Deployment** (Docker Compose + Nginx Reverse Proxy)
-3. **Decoupled Cloud Deployment** (Vercel for Frontend + Render for Backend)
+1. **Firebase Hosting & Cloud Functions** (Current Live Setup)
+2. **Cloud Single-Service Deployment** (Render / Railway / AWS EC2 / DigitalOcean)
+3. **Containerized Deployment** (Docker Compose + Nginx Reverse Proxy)
+4. **Decoupled Cloud Deployment** (Vercel for Frontend + Render for Backend)
 
 ---
 
