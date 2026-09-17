@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PassPulse — Digital Visitor Pass System Demo (Full HD)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #090D16;
+      color: #F8FAFC;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      min-height: 100vh;
+    }
+    header {
+      max-width: 1100px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1E293B;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      background: #0284C7;
+      color: white;
+      font-weight: 800;
+      font-size: 20px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+    }
+    .logo-title h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #F8FAFC;
+    }
+    .logo-title p {
+      font-size: 13px;
+      color: #94A3B8;
+    }
+    .status-pill {
+      background: #064E3B;
+      color: #34D399;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #34D399;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    .player-container {
+      max-width: 1100px;
+      width: 100%;
+      background: #0F172A;
+      border-radius: 16px;
+      border: 1px solid #1E293B;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+    }
+    video {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #000;
+      outline: none;
+    }
+    .chapter-bar {
+      padding: 20px;
+      background: #0F172A;
+      border-top: 1px solid #1E293B;
+    }
+    .chapter-bar h3 {
+      font-size: 14px;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .chapters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 10px;
+    }
+    .chapter-btn {
+      background: #131C31;
+      border: 1px solid #1E293B;
+      color: #E2E8F0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chapter-btn:hover {
+      background: #1E293B;
+      border-color: #0284C7;
+      color: #38BDF8;
+    }
+    .chapter-btn span.time {
+      font-family: monospace;
+      color: #64748B;
+      font-size: 11px;
+    }
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: #0A0F1D;
+      border-top: 1px solid #1E293B;
+    }
+    .download-btn {
+      background: #0284C7;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+    .download-btn:hover {
+      background: #0369A1;
+    }
+    .meta-info {
+      font-size: 13px;
+      color: #64748B;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-area">
+      <div class="logo-badge">P</div>
+      <div class="logo-title">
+        <h1>PassPulse Video Walkthrough</h1>
+        <p>Enterprise Digital Visitor Pass Management System (MERN Stack)</p>
+      </div>
+    </div>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      DURATION: 03:09 • 1080p FULL HD
+    </div>
+  </header>
+
+  <div class="player-container">
+    <video id="demoVideo" controls autoplay preload="metadata">
+      <source src="PassPulse_System_Demo_Video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <div class="chapter-bar">
+      <h3>Jump to System Feature / Scene:</h3>
+      <div class="chapters-grid">
+        <button class="chapter-btn" onclick="seekTo(0)">
+          1. Architecture & Overview <span class="time">00:00</span>
+        </button>
+        <button class="chapter-btn" onclick="seekTo(27)">
+          2. Visitor Kiosk & OTP <span class="time">00:27</span>
+        </button>
+        <button class="chapter-btn" onclick="seekTo(54)">
+          3. Host Approval Portal <span class="time">00:54</span>
+        </button>
+        <button class="chapter-btn" onclick="seekTo(76)">
+          4. QR Pass & PDF Badge <span class="time">01:16</span>
+        </button>
+        <button class="chapter-btn" onclick="seekTo(100)">
+          5. Gate Security Check-In <span class="time">01:40</span>
+        </button>
+        <button class="chapter-btn" onclick="seekTo(122)">
+          6. Overstay Detection & Exit <span class="time">02:02</span>
+        </button>
+        <button class="chapter-btn" onclick="seekTo(145)">
+          7. Admin Analytics & CSV <span class="time">02:25</span>
+        </button>
+        <button class="chapter-btn" onclick="seekTo(170)">
+          8. Production Deployment <span class="time">02:50</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <div class="meta-info">
+        H.264 Video • AAC Audio • 1920x1080 @ 24fps • File Size: 7.99 MB
+      </div>
+      <a class="download-btn" href="PassPulse_System_Demo_Video.mp4" download="PassPulse_System_Demo_Video.mp4">
+        ⬇ Download MP4 Video (7.99 MB)
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('demoVideo');
+    function seekTo(sec) {
+      video.currentTime = sec;
+      video.play();
+    }
+  </script>
+
+</body>
+</html>
