@@ -30,6 +30,22 @@ const protect = async (req, res, next) => {
 };
 
 /**
+ * Optional authentication: attaches user if valid token exists, but doesn't block if missing
+ */
+const optionalAuth = async (req, res, next) => {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_secret_visitor_pass_jwt_key_2026_production_ready');
+      req.user = await User.findById(decoded.id).select('-password');
+    } catch (error) {
+      // Ignore token verification errors for optional auth
+    }
+  }
+  next();
+};
+
+/**
  * Role-based authorization middleware
  * @param  {...string} roles - 'admin', 'security', 'employee'
  */
@@ -47,5 +63,7 @@ const authorizeRoles = (...roles) => {
 
 module.exports = {
   protect,
+  optionalAuth,
   authorizeRoles,
 };
+

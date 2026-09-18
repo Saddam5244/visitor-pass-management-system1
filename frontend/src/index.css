@@ -688,6 +688,34 @@ a:hover {
   background: #000000;
 }
 
+.scanner-laser {
+  position: absolute;
+  top: 0;
+  left: 5%;
+  width: 90%;
+  height: 3px;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8, 0 0 20px #0284c7;
+  animation: scanLaser 2s infinite ease-in-out alternate;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes scanLaser {
+  0% {
+    top: 5%;
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 92%;
+    opacity: 0.8;
+  }
+}
+
+
 /* Role pill buttons on login page */
 .role-pill-btn {
   display: inline-flex;

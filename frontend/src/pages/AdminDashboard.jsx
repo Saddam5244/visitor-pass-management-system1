@@ -26,7 +26,7 @@ const AdminDashboard = () => {
   });
   const [users, setUsers] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   // New Staff Modal State
   const [staffModalOpen, setStaffModalOpen] = useState(false);

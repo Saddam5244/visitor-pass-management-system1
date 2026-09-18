@@ -149,11 +149,11 @@ const registerVisitor = async (req, res) => {
       });
     }
 
-    // Start & End times default to today if not provided
+    // Start & End times default to now and 6 hours validity
     const startTime = scheduledStartTime ? new Date(scheduledStartTime) : new Date();
     const endTime = scheduledEndTime
       ? new Date(scheduledEndTime)
-      : new Date(new Date().setHours(18, 0, 0, 0)); // 6:00 PM today
+      : new Date(Date.now() + 6 * 3600 * 1000); // 6 hours from current time
 
     // Status: if autoApprove is requested (e.g. frontdesk on-the-spot pass), or host pre-authorized
     const isSecurityOrAdmin = req.user && ['admin', 'security'].includes(req.user.role);

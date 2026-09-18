@@ -10,9 +10,9 @@ const {
 
 router.use(protect);
 
-router.post('/check-in', authorizeRoles('security', 'admin'), scanCheckIn);
-router.post('/check-out', authorizeRoles('security', 'admin'), scanCheckOut);
+router.post('/check-in', authorizeRoles('security', 'admin', 'employee'), scanCheckIn);
+router.post('/check-out', authorizeRoles('security', 'admin', 'employee'), scanCheckOut);
 router.get('/inside', authorizeRoles('security', 'admin', 'employee'), getCurrentlyInside);
-router.get('/', authorizeRoles('security', 'admin'), getCheckLogs);
+router.get('/', authorizeRoles('security', 'admin', 'employee'), getCheckLogs);
 
 module.exports = router;

@@ -9,7 +9,7 @@ const generateQRCodeDataURL = async (data) => {
   try {
     const stringData = typeof data === 'object' ? JSON.stringify(data) : data;
     const dataUrl = await QRCode.toDataURL(stringData, {
-      errorCorrectionLevel: 'H',
+      errorCorrectionLevel: 'M',
       type: 'image/png',
       margin: 2,
       width: 300,

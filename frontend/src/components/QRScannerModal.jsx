@@ -1,6 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { Camera, Keyboard, LogIn, LogOut, X, RefreshCw } from 'lucide-react';
+import QRCode from 'qrcode';
+import {
+  Camera,
+  Keyboard,
+  LogIn,
+  LogOut,
+  X,
+  RefreshCw,
+  Upload,
+  QrCode as QrIcon,
+  Sparkles,
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 import api from '../services/api';
 import { useNotification } from '../context/NotificationContext';
@@ -8,15 +19,77 @@ import StatusPill from './StatusPill';
 
 const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
   const { showToast } = useNotification();
-  const [activeTab, setActiveTab] = useState('camera'); // 'camera' or 'manual'
+  const [activeTab, setActiveTab] = useState('camera'); // 'camera', 'upload', 'manual'
   const [passNumberInput, setPassNumberInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [scannedPass, setScannedPass] = useState(null);
   const [cameraError, setCameraError] = useState('');
   const [selectedGate, setSelectedGate] = useState('Main Entrance');
   const [belongings, setBelongings] = useState('Laptop / Mobile');
+
+  // Camera devices
+  const [cameras, setCameras] = useState([]);
+  const [selectedCameraId, setSelectedCameraId] = useState('');
+
+  // Sample QR display helper
+  const [showSampleQR, setShowSampleQR] = useState(false);
+  const [sampleQRImage, setSampleQRImage] = useState('');
+  const [samplePassNumber, setSamplePassNumber] = useState('VP-2026-1001');
+
   const html5QrCodeRef = useRef(null);
 
+  // Generate Sample QR Code on request
+  useEffect(() => {
+    QRCode.toDataURL(samplePassNumber, {
+      margin: 2,
+      width: 260,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#0a0f1d', light: '#ffffff' },
+    })
+      .then((url) => setSampleQRImage(url))
+      .catch(() => {});
+  }, [samplePassNumber]);
+
+  // Handle Pass Verification
+  const handleVerify = useCallback(
+    async (codeToVerify) => {
+      let target = (codeToVerify || passNumberInput || '').trim();
+      if (!target) {
+        showToast('Please enter or scan a pass number', 'warning');
+        return;
+      }
+
+      // If QR code contains a URL, extract pass number from path
+      if (target.includes('/pass/')) {
+        const parts = target.split('/pass/')[1].split('?')[0].split('/');
+        target = parts[0];
+      }
+
+      // If target is a JSON string payload from the QR code
+      try {
+        const parsed = JSON.parse(target);
+        if (parsed.passNumber) target = parsed.passNumber;
+      } catch {}
+
+      setLoading(true);
+      try {
+        const res = await api.post('/passes/verify-qr', { qrData: target });
+        if (res.success && res.pass) {
+          setScannedPass(res.pass);
+          showToast(`Pass verified: ${res.pass.passNumber}`, 'success');
+        } else {
+          showToast(res.message || 'Pass verification failed', 'error');
+        }
+      } catch (err) {
+        showToast(err.message || 'Pass not found in database', 'error');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [passNumberInput, showToast]
+  );
+
+  // Live Camera Scanner Lifecycle
   useEffect(() => {
     let qrInstance = null;
 
@@ -24,16 +97,25 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
       const startScanner = async () => {
         try {
           setCameraError('');
-          await new Promise((resolve) => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 250));
           const element = document.getElementById('qr-reader-viewport');
           if (!element) return;
 
           qrInstance = new Html5Qrcode('qr-reader-viewport');
           html5QrCodeRef.current = qrInstance;
 
+          // Fetch available cameras
+          const devices = await Html5Qrcode.getCameras().catch(() => []);
+          setCameras(devices || []);
+
           const scannerConfig = {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
+            fps: 15,
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+              const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+              const edge = Math.max(160, Math.floor(minEdge * 0.75));
+              return { width: edge, height: edge };
+            },
+            aspectRatio: 1.0,
           };
 
           const onScanSuccess = (decodedText) => {
@@ -43,25 +125,21 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
             }
           };
 
-          // Try environment camera (mobile), then user webcam (laptops/desktops)
-          try {
-            await qrInstance.start({ facingMode: 'environment' }, scannerConfig, onScanSuccess, () => {});
-          } catch (envErr) {
-            console.warn('Environment camera unavailable, falling back to front/user webcam:', envErr);
+          const cameraIdToUse = selectedCameraId || (devices && devices.length > 0 ? devices[0].id : null);
+
+          if (cameraIdToUse) {
+            await qrInstance.start(cameraIdToUse, scannerConfig, onScanSuccess, () => {});
+          } else {
+            // Default facing mode
             try {
+              await qrInstance.start({ facingMode: 'environment' }, scannerConfig, onScanSuccess, () => {});
+            } catch {
               await qrInstance.start({ facingMode: 'user' }, scannerConfig, onScanSuccess, () => {});
-            } catch (userErr) {
-              const devices = await Html5Qrcode.getCameras().catch(() => []);
-              if (devices && devices.length > 0) {
-                await qrInstance.start(devices[0].id, scannerConfig, onScanSuccess, () => {});
-              } else {
-                throw userErr;
-              }
             }
           }
         } catch (err) {
           console.warn('Camera start issue:', err);
-          setCameraError('Webcam not detected or permission denied. Please switch to Manual Pass Entry.');
+          setCameraError('Webcam not detected or permission denied. Switch to File Upload or Manual Entry.');
         }
       };
 
@@ -73,40 +151,27 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
         html5QrCodeRef.current.stop().catch(() => {});
       }
     };
-  }, [isOpen, activeTab, scannedPass]);
+  }, [isOpen, activeTab, scannedPass, selectedCameraId, handleVerify]);
 
-  const handleVerify = async (codeToVerify) => {
-    let target = (codeToVerify || passNumberInput || '').trim();
-    if (!target) {
-      showToast('Please enter or scan a pass number', 'warning');
-      return;
-    }
-
-    // If QR code contains a URL, extract pass number from path
-    if (target.includes('/pass/')) {
-      const parts = target.split('/pass/')[1].split('?')[0].split('/');
-      target = parts[0];
-    }
-
-    // If target is a JSON string payload from the QR code
-    try {
-      const parsed = JSON.parse(target);
-      if (parsed.passNumber) target = parsed.passNumber;
-    } catch {}
+  // Handle Image File Upload Scanning
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     setLoading(true);
     try {
-      const res = await api.post('/passes/verify-qr', { qrData: target });
-      if (res.success && res.pass) {
-        setScannedPass(res.pass);
-        showToast(`Pass verified: ${res.pass.passNumber}`, 'success');
-      } else {
-        showToast(res.message || 'Pass verification failed', 'error');
+      let instance = html5QrCodeRef.current;
+      if (!instance) {
+        instance = new Html5Qrcode('qr-reader-file-dummy');
+        html5QrCodeRef.current = instance;
       }
-    } catch (err) {
-      showToast(err.message || 'Pass not found in database', 'error');
+      const decodedText = await instance.scanFile(file, true);
+      handleVerify(decodedText);
+    } catch {
+      showToast('Could not find a valid QR code in this image. Try another photo or enter pass ID.', 'warning');
     } finally {
       setLoading(false);
+      e.target.value = '';
     }
   };
 
@@ -165,7 +230,7 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-dialog" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal-dialog" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Camera color="#2563eb" size={18} />
@@ -177,25 +242,111 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
         </div>
 
         <div className="modal-body">
+          {/* Tab Selector */}
           {!scannedPass && (
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
               <button
                 className={`btn btn-sm ${activeTab === 'camera' ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setActiveTab('camera')}
-                style={{ flex: 1 }}
+                style={{ flex: 1, fontSize: '12px' }}
               >
-                <Camera size={14} /> Live Camera Scanner
+                <Camera size={13} /> Live Camera
+              </button>
+              <button
+                className={`btn btn-sm ${activeTab === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setActiveTab('upload')}
+                style={{ flex: 1, fontSize: '12px' }}
+              >
+                <Upload size={13} /> Upload QR
               </button>
               <button
                 className={`btn btn-sm ${activeTab === 'manual' ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setActiveTab('manual')}
-                style={{ flex: 1 }}
+                style={{ flex: 1, fontSize: '12px' }}
               >
-                <Keyboard size={14} /> Pass ID / Barcode Entry
+                <Keyboard size={13} /> Manual / Test
               </button>
             </div>
           )}
 
+          {/* Quick Helper Toggle to display a Sample QR code */}
+          {!scannedPass && (
+            <div style={{ marginBottom: '14px', textAlign: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setShowSampleQR(!showSampleQR)}
+                className="btn btn-secondary btn-sm"
+                style={{
+                  fontSize: '11px',
+                  background: showSampleQR ? '#fef3c7' : '#f8fafc',
+                  color: showSampleQR ? '#92400e' : '#475569',
+                  borderColor: showSampleQR ? '#fde68a' : '#cbd5e1',
+                }}
+              >
+                <QrIcon size={13} /> {showSampleQR ? 'Hide Test QR Badge' : '⚡ Show Test QR Badge on Screen'}
+              </button>
+            </div>
+          )}
+
+          {/* Sample QR Display Drawer */}
+          {showSampleQR && !scannedPass && (
+            <div
+              style={{
+                background: '#fff',
+                border: '2px dashed #93c5fd',
+                borderRadius: '10px',
+                padding: '14px',
+                marginBottom: '16px',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#1e40af', marginBottom: '4px' }}>
+                Test Visitor Pass QR Code
+              </div>
+              <p style={{ fontSize: '11px', color: '#64748b', marginBottom: '10px' }}>
+                Hold your phone camera to this QR code or click "Instant Test Scan" below:
+              </p>
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '10px' }}>
+                {['VP-2026-1001', 'VP-2026-1002', 'VP-2026-1003'].map((code) => (
+                  <button
+                    key={code}
+                    onClick={() => setSamplePassNumber(code)}
+                    className={`btn btn-sm ${samplePassNumber === code ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ fontSize: '11px', padding: '3px 8px' }}
+                  >
+                    {code}
+                  </button>
+                ))}
+              </div>
+
+              {sampleQRImage && (
+                <div style={{ background: '#ffffff', display: 'inline-block', padding: '8px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                  <img
+                    src={sampleQRImage}
+                    alt="Sample QR Code"
+                    style={{ width: '160px', height: '160px', display: 'block' }}
+                  />
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>
+                    {samplePassNumber}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ marginTop: '10px' }}>
+                <button
+                  onClick={() => handleVerify(samplePassNumber)}
+                  className="btn btn-success btn-sm"
+                  style={{ fontSize: '12px', fontWeight: 600 }}
+                  disabled={loading}
+                >
+                  <Sparkles size={13} /> Instant Test Scan ({samplePassNumber})
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* SCANNED PASS DETAILS */}
           {scannedPass ? (
             <div>
               <div
@@ -283,7 +434,9 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
                   <div>
                     <span style={{ color: '#64748b' }}>Valid Until:</span>{' '}
                     <strong style={{ color: '#2563eb' }}>
-                      {scannedPass.validTo ? new Date(scannedPass.validTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today'}
+                      {scannedPass.validTo
+                        ? new Date(scannedPass.validTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : 'Today'}
                     </strong>
                   </div>
                   <div>
@@ -344,8 +497,27 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
             </div>
           ) : activeTab === 'camera' ? (
             <div>
+              {/* Camera Selector Dropdown */}
+              {cameras.length > 1 && (
+                <div style={{ marginBottom: '10px' }}>
+                  <select
+                    className="form-select"
+                    value={selectedCameraId}
+                    onChange={(e) => setSelectedCameraId(e.target.value)}
+                    style={{ fontSize: '12px' }}
+                  >
+                    {cameras.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.label || `Camera ${c.id.slice(0, 5)}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="scanner-viewport">
                 <div id="qr-reader-viewport" style={{ width: '100%', height: '100%' }} />
+                <div className="scanner-laser" />
               </div>
 
               {cameraError ? (
@@ -362,20 +534,67 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
                   }}
                 >
                   {cameraError}
-                  <div style={{ marginTop: '6px' }}>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => setActiveTab('manual')}
-                    >
-                      Switch to Manual Entry
+                  <div style={{ marginTop: '8px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                    <button className="btn btn-primary btn-sm" onClick={() => setActiveTab('upload')}>
+                      <Upload size={12} /> Upload QR Image
+                    </button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => setActiveTab('manual')}>
+                      <Keyboard size={12} /> Manual Pass ID
                     </button>
                   </div>
                 </div>
               ) : (
-                <p style={{ textAlign: 'center', fontSize: '12px', color: '#64748b', marginTop: '10px' }}>
-                  Position the visitor's QR code within view of the camera
-                </p>
+                <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                  <p style={{ fontSize: '12px', color: '#475569', margin: 0, fontWeight: 500 }}>
+                    Hold the visitor's QR code in front of the camera
+                  </p>
+                  <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                    (QR code ko camera ke saamne laayein)
+                  </p>
+                </div>
               )}
+            </div>
+          ) : activeTab === 'upload' ? (
+            <div style={{ textAlign: 'center', padding: '20px 10px' }}>
+              <div
+                style={{
+                  border: '2px dashed #cbd5e1',
+                  borderRadius: '12px',
+                  padding: '30px 16px',
+                  background: '#f8fafc',
+                  cursor: 'pointer',
+                  position: 'relative',
+                }}
+              >
+                <Upload size={36} color="#2563eb" style={{ margin: '0 auto 10px' }} />
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a', marginBottom: '4px' }}>
+                  Upload QR Code Image or Screenshot
+                </div>
+                <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '16px' }}>
+                  Select a picture containing the pass QR code from your phone or PC
+                </p>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    cursor: 'pointer',
+                  }}
+                />
+
+                <button type="button" className="btn btn-primary btn-sm" style={{ pointerEvents: 'none' }}>
+                  Choose Image File
+                </button>
+              </div>
+
+              <div id="qr-reader-file-dummy" style={{ display: 'none' }} />
             </div>
           ) : (
             <div>
@@ -391,48 +610,56 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
                     onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
                     autoFocus
                   />
-                  <button
-                    onClick={() => handleVerify()}
-                    className="btn btn-primary"
-                    disabled={loading}
-                  >
+                  <button onClick={() => handleVerify()} className="btn btn-primary" disabled={loading}>
                     Lookup
                   </button>
                 </div>
               </div>
 
               {/* Demo Database Passes */}
-              <div style={{ marginTop: '14px' }}>
-                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, marginBottom: '6px' }}>
-                  Pre-Seeded Database Passes:
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, marginBottom: '8px' }}>
+                  ⚡ Quick Test Passes (Click to Instant Scan):
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <button
                     className="role-pill-btn"
+                    style={{ justifyContent: 'space-between' }}
                     onClick={() => {
                       setPassNumberInput('VP-2026-1001');
                       handleVerify('VP-2026-1001');
                     }}
                   >
-                    VP-2026-1001 (Alice)
+                    <span>
+                      <strong>VP-2026-1001</strong> - Alice Johnson (Client Demo)
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#2563eb' }}>Verify Pass →</span>
                   </button>
                   <button
                     className="role-pill-btn"
+                    style={{ justifyContent: 'space-between' }}
                     onClick={() => {
                       setPassNumberInput('VP-2026-1002');
                       handleVerify('VP-2026-1002');
                     }}
                   >
-                    VP-2026-1002 (Bob)
+                    <span>
+                      <strong>VP-2026-1002</strong> - Bob Smith (Contractor Inside)
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#2563eb' }}>Verify Pass →</span>
                   </button>
                   <button
                     className="role-pill-btn"
+                    style={{ justifyContent: 'space-between' }}
                     onClick={() => {
                       setPassNumberInput('VP-2026-1003');
                       handleVerify('VP-2026-1003');
                     }}
                   >
-                    VP-2026-1003 (Claire)
+                    <span>
+                      <strong>VP-2026-1003</strong> - Claire Vance (Overstay Alert)
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#2563eb' }}>Verify Pass →</span>
                   </button>
                 </div>
               </div>

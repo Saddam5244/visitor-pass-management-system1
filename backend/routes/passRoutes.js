@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorizeRoles } = require('../middleware/authMiddleware');
+const { protect, optionalAuth, authorizeRoles } = require('../middleware/authMiddleware');
 const {
   getPassById,
   getPassByNumber,
@@ -14,8 +14,8 @@ router.get('/:id/pdf', downloadPassPDF);
 router.get('/number/:passNumber', getPassByNumber);
 router.get('/:id', getPassById);
 
-// Protected routes
-router.post('/verify-qr', protect, authorizeRoles('security', 'admin'), verifyQRPayload);
+// Verification endpoint accepts optional auth so frontdesk/security/kiosks can all verify passes
+router.post('/verify-qr', optionalAuth, verifyQRPayload);
 router.get('/', protect, authorizeRoles('security', 'admin', 'employee'), getAllPasses);
 
 module.exports = router;

@@ -1,46 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
-import { Download, Printer, ShieldCheck, Clock, UserCheck, Building } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import api from '../services/api';
 import StatusPill from './StatusPill';
 
-const PassBadge = ({ pass, visitor, host, organization, onStatusChange }) => {
+const PassBadge = ({ pass, visitor, host, organization }) => {
+  const [qrImage, setQrImage] = useState(pass?.qrCodeData || null);
+
+  useEffect(() => {
+    if (!pass) return;
+    // Generate crisp, large-block QR code easily readable by any webcam
+    const qrPayload = pass.passNumber || 'PASS-DEMO';
+
+    QRCode.toDataURL(qrPayload, {
+      margin: 2,
+      width: 260,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#0a0f1d', light: '#ffffff' },
+    })
+      .then((url) => setQrImage(url))
+      .catch(() => {
+        if (pass.qrCodeData) setQrImage(pass.qrCodeData);
+      });
+  }, [pass]);
+
   if (!pass) return null;
 
   const currentVisitor = visitor || pass.visitorId;
   const currentHost = host || pass.hostId;
   const currentOrg = organization || pass.organizationId;
 
-  const [qrImage, setQrImage] = useState(pass.qrCodeData || null);
-
-  useEffect(() => {
-    if (pass.qrCodeData && pass.qrCodeData.startsWith('data:image')) {
-      setQrImage(pass.qrCodeData);
-      return;
-    }
-
-    // Generate crisp QR code on the fly from pass details
-    const qrPayload = JSON.stringify({
-      passNumber: pass.passNumber,
-      visitor: currentVisitor?.fullName || '',
-      validTo: pass.validTo || '',
-      issuedAt: pass.validFrom || new Date().toISOString(),
-    });
-
-    QRCode.toDataURL(qrPayload, {
-      margin: 1,
-      width: 240,
-      errorCorrectionLevel: 'M',
-      color: { dark: '#0f172a', light: '#ffffff' },
-    })
-      .then((url) => setQrImage(url))
-      .catch(() => {
-        // Fallback to passNumber string
-        QRCode.toDataURL(pass.passNumber || 'PASS-DEMO', { margin: 1, width: 240 })
-          .then((url) => setQrImage(url))
-          .catch(() => {});
-      });
-  }, [pass.passNumber, pass.qrCodeData, currentVisitor?.fullName, pass.validTo, pass.validFrom]);
 
   const handleDownloadPDF = async () => {
     try {

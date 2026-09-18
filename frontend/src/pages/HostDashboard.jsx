@@ -7,16 +7,16 @@ import {
   Clock,
   Search,
   RefreshCw,
+  QrCode,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import StatusPill from '../components/StatusPill';
 import Modal from '../components/Modal';
+import PassBadge from '../components/PassBadge';
 
 const HostDashboard = () => {
-  const { user } = useAuth();
   const { showToast } = useNotification();
 
   const [appointments, setAppointments] = useState([]);
@@ -42,6 +42,43 @@ const HostDashboard = () => {
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [approvalRemarks, setApprovalRemarks] = useState('');
   const [processingAction, setProcessingAction] = useState(false);
+
+  // Badge Modal State
+  const [badgeModalOpen, setBadgeModalOpen] = useState(false);
+  const [selectedBadgePass, setSelectedBadgePass] = useState(null);
+
+  const handleOpenBadge = async (appt) => {
+    if (appt?.pass) {
+      setSelectedBadgePass({
+        ...appt.pass,
+        visitorId: appt.visitorId,
+        hostId: appt.hostId,
+        organizationId: appt.organizationId,
+      });
+      setBadgeModalOpen(true);
+      return;
+    }
+    try {
+      const res = await api.get('/passes');
+      if (res.success && res.passes) {
+        const found = res.passes.find(
+          (p) =>
+            p.appointmentId === appt._id ||
+            p.appointmentId?._id === appt._id ||
+            p.visitorId?._id === appt.visitorId?._id
+        );
+        if (found) {
+          setSelectedBadgePass(found);
+          setBadgeModalOpen(true);
+          return;
+        }
+      }
+      showToast('No digital pass badge has been generated for this appointment yet', 'info');
+    } catch {
+      showToast('Could not load pass badge', 'error');
+    }
+  };
+
 
   const fetchAppointments = async () => {
     try {
@@ -362,9 +399,19 @@ const HostDashboard = () => {
                           </button>
                         </div>
                       ) : (
-                        <span style={{ fontSize: '11px', color: '#64748b' }}>
-                          {appt.approvalRemarks || 'Authorized'}
-                        </span>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <button
+                            onClick={() => handleOpenBadge(appt)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ padding: '4px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            title="View QR Badge"
+                          >
+                            <QrCode size={12} color="#2563eb" /> QR Badge
+                          </button>
+                          <span style={{ fontSize: '11px', color: '#64748b' }}>
+                            {appt.pass?.passNumber || appt.approvalRemarks || 'Authorized'}
+                          </span>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -526,6 +573,27 @@ const HostDashboard = () => {
           </div>
         )}
       </Modal>
+
+      {/* View Pass Badge Modal */}
+      {badgeModalOpen && selectedBadgePass && (
+        <Modal
+          isOpen={badgeModalOpen}
+          onClose={() => {
+            setBadgeModalOpen(false);
+            setSelectedBadgePass(null);
+          }}
+          title={`Visitor Badge: ${selectedBadgePass.passNumber || 'Visitor Pass'}`}
+        >
+          <div style={{ textAlign: 'center', padding: '10px 0' }}>
+            <PassBadge
+              pass={selectedBadgePass}
+              visitor={selectedBadgePass.visitorId}
+              host={selectedBadgePass.hostId}
+              organization={selectedBadgePass.organizationId}
+            />
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

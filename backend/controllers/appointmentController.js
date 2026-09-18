@@ -39,10 +39,24 @@ const getAppointments = async (req, res) => {
       .populate('organizationId', 'name code')
       .sort('-scheduledStartTime');
 
+    // Attach pass if already generated for this appointment
+    const appointmentIds = appointments.map((a) => a._id);
+    const passes = await Pass.find({ appointmentId: { $in: appointmentIds } });
+    const passMap = {};
+    passes.forEach((p) => {
+      passMap[p.appointmentId.toString()] = p;
+    });
+
+    const enrichedAppointments = appointments.map((a) => {
+      const doc = a.toObject();
+      doc.pass = passMap[a._id.toString()] || null;
+      return doc;
+    });
+
     return res.status(200).json({
       success: true,
-      count: appointments.length,
-      appointments,
+      count: enrichedAppointments.length,
+      appointments: enrichedAppointments,
     });
   } catch (err) {
     console.error('Get appointments error:', err);

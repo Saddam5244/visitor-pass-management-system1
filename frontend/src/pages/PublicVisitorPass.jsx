@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  UserCheck,
   Camera,
   CheckCircle2,
-  Mail,
-  Building,
   Clock,
   ArrowRight,
   Upload,
@@ -176,6 +173,22 @@ const PublicVisitorPass = () => {
     }
   };
 
+  const handleQuickDemoFill = () => {
+    setFormData((prev) => ({
+      ...prev,
+      fullName: 'Vikram Sharma',
+      email: 'vikram.sharma@techpartner.com',
+      phone: '+91 98765 43210',
+      company: 'Tech Partner Solutions',
+      idProofType: 'Aadhaar / National ID',
+      idProofNumber: 'ABCD1234XYZ',
+      purpose: 'Technical Consultation',
+      hostId: hosts[0]?._id || prev.hostId,
+    }));
+    setIsOtpVerified(true);
+    showToast('Demo visitor filled and verified! Click "Submit & Generate Pass"', 'info');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -192,13 +205,14 @@ const PublicVisitorPass = () => {
 
     setSubmitting(true);
     try {
-      const res = await api.post('/visitors/register', formData);
+      // autoApprove: true ensures instant pass and QR code generation for the visitor kiosk
+      const res = await api.post('/visitors/register', { ...formData, autoApprove: true });
       if (res.success) {
         setSubmissionStatus(res.status);
         if (res.pass) {
           setGeneratedPass(res.pass);
           confetti({ particleCount: 90, spread: 60 });
-          showToast('Pass issued and stored in database!', 'success');
+          showToast('Pass issued with scannable QR Code!', 'success');
         } else {
           showToast('Pre-registration saved! Awaiting host authorization.', 'success');
         }
@@ -266,9 +280,19 @@ const PublicVisitorPass = () => {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="card">
-          <h3 style={{ marginBottom: '16px', fontSize: '1.1rem', color: '#0f172a' }}>
-            1. Personal Information
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>
+              1. Personal Information
+            </h3>
+            <button
+              type="button"
+              onClick={handleQuickDemoFill}
+              className="btn btn-secondary btn-sm"
+              style={{ fontSize: '11px', color: '#2563eb', borderColor: '#bfdbfe', background: '#eff6ff' }}
+            >
+              ⚡ Auto-Fill Demo Visitor (Instant QR Pass)
+            </button>
+          </div>
 
           <div className="form-row">
             <div className="form-group">
