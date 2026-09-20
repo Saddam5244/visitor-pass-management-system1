@@ -1,0 +1,58 @@
+services:
+  # MongoDB Service
+  mongodb:
+    image: mongo:7-jammy
+    container_name: passpulse-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: visitor_pass_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - passpulse-net
+
+  # Express Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: passpulse-backend
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      MONGO_URI: mongodb://mongodb:27017/visitor_pass_db
+      JWT_SECRET: super_secure_passpulse_jwt_secret_key_2026
+      CLIENT_URL: http://localhost
+    ports:
+      - "5000:5000"
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - passpulse-net
+
+  # React Frontend & Nginx Web Server
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: passpulse-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - passpulse-net
+
+volumes:
+  mongo_data:
+  uploads_data:
+
+networks:
+  passpulse-net:
+    driver: bridge
