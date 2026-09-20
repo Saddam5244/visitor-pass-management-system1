@@ -7,6 +7,48 @@ PassPulse is an enterprise-grade **Visitor Pass Management System** built with t
 
 ---
 
+## 📸 Application Screenshots & UI Tour
+
+### 🔐 1. Authentication & Staff Registration
+| PassPulse Portal (1-Click Demo Logins) | Staff Registration Portal |
+| :---: | :---: |
+| ![PassPulse Portal](screenshots/01-login-portal.png) | ![Staff Registration](screenshots/02-staff-registration.png) |
+
+### 📊 2. Admin Dashboard & Staff Directory
+*Real-time system statistics (Total Visitors, Active Inside, Today's Entries, Overstay Alerts) and staff directory roster.*
+![Admin Dashboard & Directory](screenshots/03-admin-dashboard.png)
+
+### 🛡️ 3. Security Live Desk & Visitor Scanner
+*Ingress/egress management, live QR badge verification, active on-site evacuation roll call, and overstay monitoring.*
+![Security Desk & Visitor Scanner](screenshots/04-security-desk.png)
+
+### 👮 4. Dedicated Security Officer Desk (Gate Guard Views)
+*Tailored role-based interface for frontdesk guards with streamlined navigation for Check-in, Appointments, and Entry Logs.*
+
+| Security Desk (Guard View) | Security Access Entry Logs |
+| :---: | :---: |
+| ![Security Guard View](screenshots/08-security-guard-view.png) | ![Security Entry Logs](screenshots/09-security-entry-logs.png) |
+
+*Security Guard Appointments Lookup:*
+![Security Appointments View](screenshots/10-security-appointments.png)
+
+### 📅 5. Host Employee & HR Department Portal
+*Dedicated host interface for employee hosts and HR to invite guests, approve visit appointments, and track QR passes.*
+
+| Host Portal (Admin View) | HR Department Host Portal (Host View) |
+| :---: | :---: |
+| ![Host Portal Admin View](screenshots/05-host-appointments.png) | ![HR Host Portal View](screenshots/11-hr-host-portal.png) |
+
+### 📈 6. Visitor Reports & Analytics
+*Traffic histograms (peak entry hours), visitor categories breakdown, entry/exit logs, and one-click CSV exports.*
+![Visitor Reports & Analytics](screenshots/06-reports-analytics.png)
+
+### 🏢 7. Multi-Organization & Campuses Management
+*Enterprise multi-tenant management for parent organizations, branches, and custom gate clearance points.*
+![Organizations & Campuses](screenshots/07-organizations-campuses.png)
+
+---
+
 ## Architecture & System Workflow
 
 ### System Workflow
@@ -184,6 +226,18 @@ Visitor_Pass_Management_System/
 │   ├── Dockerfile.backend
 │   ├── Dockerfile.frontend
 │   └── nginx.conf
+├── screenshots/
+│   ├── 01-login-portal.png
+│   ├── 02-staff-registration.png
+│   ├── 03-admin-dashboard.png
+│   ├── 04-security-desk.png
+│   ├── 05-host-appointments.png
+│   ├── 06-reports-analytics.png
+│   ├── 07-organizations-campuses.png
+│   ├── 08-security-guard-view.png
+│   ├── 09-security-entry-logs.png
+│   ├── 10-security-appointments.png
+│   └── 11-hr-host-portal.png
 ├── docker-compose.yml
 └── README.md
 ```
