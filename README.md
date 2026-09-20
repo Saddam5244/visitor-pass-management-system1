@@ -192,10 +192,6 @@ Visitor_Pass_Management_System/
 
 ## Getting Started & Local Setup
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) v18+ (tested on v22.20)
-- [MongoDB](https://www.mongodb.com/) running locally on port `27017` (or MongoDB Atlas connection string)
-
 ### 1. Clone & Configure Backend
 ```bash
 cd backend
@@ -207,7 +203,6 @@ PORT=5000
 NODE_ENV=development
 MONGO_URI=mongodb://127.0.0.1:27017/visitor_pass_db
 JWT_SECRET=super_secret_visitor_pass_jwt_key_2026_production_ready
-CLIENT_URL=http://localhost:5173
 ```
 
 ### 2. Seed Realistic Demo Data
